@@ -45,4 +45,3 @@ public enum VoxMode {
         return value;
     }
 }
-

@@ -1,6 +1,8 @@
 // CustomPttHandler.java
 package com.eakins.zello.api.ptt;
 
+import com.eakins.zello.api.ZelloChannelClient;
+
 /**
  * Interface for implementing custom Push-To-Talk (PTT) logic.
  * Developers can implement this to integrate their application's UI or hardware
@@ -34,4 +36,3 @@ public interface CustomPttHandler {
     // is expected to *call* the ZelloChannelClient's methods based on its
     // internal event loop or listeners. This provides maximum flexibility.
 }
-

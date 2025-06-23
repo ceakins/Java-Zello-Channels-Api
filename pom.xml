@@ -6,7 +6,7 @@
 
     <groupId>com.eakins.zello</groupId>
     <artifactId>zello-java-api</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Zello Java API</name>
@@ -14,9 +14,10 @@
     <!-- <url>http://www.example.com/zello-java-api</url> -->
 
     <properties>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
+        <maven.compiler.release>24</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <slf4j.version>2.0.13</slf4j.version>
+        <logback.version>1.5.6</logback.version>
     </properties>
 
     <dependencies>
@@ -26,26 +27,13 @@
         dependencies for these functionalities. Below are common choices.
         -->
 
-        <!-- WebSocket Client Library (Choose one) -->
-        <!-- Option 1: nv-websocket-client (Recommended for performance and async control) -->
-        <!--
+        <!-- WebSocket Client Library -->
         <dependency>
             <groupId>com.neovisionaries</groupId>
             <artifactId>nv-websocket-client</artifactId>
             <version>2.14</version>
         </dependency>
-        -->
-        <!-- Option 2: Tyrus Client (JSR 356 Reference Implementation) -->
-        <!--
-        <dependency>
-            <groupId>org.glassfish.tyrus.bundles</groupId>
-            <artifactId>tyrus-standalone-client</artifactId>
-            <version>2.0</version>
-        </dependency>
-        -->
-
         <!-- JSON Processing Library (for Zello protocol messages) -->
-        <!-- Option 1: Jackson (Popular and powerful) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -53,7 +41,6 @@
         </dependency>
 
         <!-- Opus Codec Library (JNI-based for performance) -->
-        <!-- Note: opus-jni requires native libraries. See its documentation for setup. -->
         <!--
         <dependency>
             <groupId>org.concentus</groupId>
@@ -62,13 +49,11 @@
         </dependency>
         -->
         <!-- Or if you prefer a pure Java Opus implementation (may have performance implications) -->
-        <!--
         <dependency>
-            <groupId>org.concentus</groupId>
-            <artifactId>Concentus</artifactId>
-            <version>1.3.1</version>
+            <groupId>io.github.jaredmdobson</groupId>
+            <artifactId>concentus</artifactId>
+            <version>1.0.2</version>
         </dependency>
-        -->
 
         <!-- Voice Activity Detection (VAD) Library -->
         <!-- Note: Jitsi-WebRTC-VAD-Wrapper also requires native libraries. -->
@@ -79,6 +64,25 @@
             <version>1.2.0</version>
         </dependency>
         -->
+
+        <!-- SLF4J API -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <!-- Logback Classic (SLF4J implementation) -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <!-- Logback Core (dependency for logback-classic) -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
 
         <!-- JUnit for testing (Recommended) -->
         <!--
@@ -104,8 +108,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
             <!-- You might add plugins for packaging, native library handling, etc. -->

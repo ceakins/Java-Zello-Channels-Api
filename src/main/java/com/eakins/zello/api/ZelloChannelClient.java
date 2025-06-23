@@ -12,6 +12,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Main client for interacting with Zello channels.
  * This class orchestrates WebSocket communication, audio capture/playback,
@@ -20,6 +23,8 @@ import java.util.concurrent.Future;
  * Use the ZelloChannelClientBuilder to construct instances of this client.
  */
 public class ZelloChannelClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(ZelloChannelClient.class);
 
     // --- Configuration Fields (Set via Builder) ---
     private String serverUri;
@@ -47,7 +52,9 @@ public class ZelloChannelClient {
     private Object audioCaptureManager; // Manages microphone input (TargetDataLine)
     private Object audioPlaybackManager; // Manages speaker output (SourceDataLine)
     private Object opusCodecManager; // Handles Opus encoding/decoding
-    private Object voiceActivityDetector; // Handles VAD logic (if VOX enabled)
+    // For simple signal-vs-silence detection, a dedicated VoiceActivityDetector *library* might not be needed.
+    // Instead, basic audio energy analysis could be performed directly within AudioCaptureManager or here.
+    private Object voiceActivityDetector; // Placeholder for simple signal detection logic
     private Object pttController; // Internal controller for PTT logic
 
     /**
@@ -71,13 +78,15 @@ public class ZelloChannelClient {
         this.networkExecutor = Executors.newSingleThreadExecutor();
         this.audioExecutor = Executors.newFixedThreadPool(2); // One for capture, one for playback, one for processing
 
-        // In a real app, instantiate actual WebSocket, Audio, Opus, VAD managers here.
+        // In a real app, instantiate actual WebSocket, Audio, Opus, and simple VAD managers here.
         // For example:
         // this.zelloWebSocketHandler = new ZelloWebSocketHandler(serverUri, this::onWebSocketMessage, this::onWebSocketError);
         // this.audioCaptureManager = new AudioCaptureManager(audioFormat);
         // this.opusCodecManager = new OpusCodecManager(audioFormat);
         // if (voxMode != null) {
-        //     this.voiceActivityDetector = new VoiceActivityDetector(audioFormat, voxMode);
+        //     // For simple signal-vs-silence, 'voiceActivityDetector' could be an internal class
+        //     // that performs energy-based detection, using voxMode for sensitivity threshold.
+        //     this.voiceActivityDetector = new SimpleSignalDetector(audioFormat, voxMode);
         // }
         // this.pttController = new PttController(this); // Internal PTT logic handler
     }
@@ -97,11 +106,11 @@ public class ZelloChannelClient {
      */
     public void connect() {
         if (connected) {
-            System.out.println("ZelloChannelClient is already connected.");
+            logger.warn("ZelloChannelClient is already connected.");
             return;
         }
 
-        System.out.println("Connecting to Zello channel: " + channelName + " at " + serverUri + "...");
+        logger.info("Connecting to Zello channel: {} at {}...", channelName, serverUri);
         // Simulate WebSocket connection and logon process
         networkExecutor.submit(() -> {
             try {
@@ -113,7 +122,7 @@ public class ZelloChannelClient {
                 Thread.sleep(1000); // Simulate logon response time
 
                 connected = true;
-                System.out.println("Connected to Zello channel: " + channelName);
+                logger.info("Connected to Zello channel: {}", channelName);
                 // Notify listeners about connection success and initial channel status
                 for (ZelloMessageListener listener : messageListeners) {
                     listener.onChannelStatusChanged(channelName, "connected");
@@ -121,15 +130,15 @@ public class ZelloChannelClient {
 
                 // If VOX is enabled, start continuous audio monitoring
                 if (voxMode != null) {
-                    System.out.println("VOX enabled. Starting continuous audio capture for VAD...");
+                    logger.info("VOX enabled. Starting continuous audio capture for signal detection...");
                     startVoxAudioMonitoring();
                 }
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.err.println("Connection interrupted: " + e.getMessage());
+                logger.error("Connection interrupted: {}", e.getMessage(), e);
             } catch (Exception e) {
-                System.err.println("Error connecting: " + e.getMessage());
+                logger.error("Error connecting: {}", e.getMessage(), e);
                 // Notify listeners about connection error
                 for (ZelloMessageListener listener : messageListeners) {
                     listener.onError(e);
@@ -144,11 +153,11 @@ public class ZelloChannelClient {
      */
     public void disconnect() {
         if (!connected) {
-            System.out.println("ZelloChannelClient is not connected.");
+            logger.warn("ZelloChannelClient is not connected.");
             return;
         }
 
-        System.out.println("Disconnecting from Zello channel: " + channelName + "...");
+        logger.info("Disconnecting from Zello channel: {}...", channelName);
         if (pttActive) {
             stopPushToTalk(); // Ensure PTT stream is stopped before disconnecting
         }
@@ -162,16 +171,16 @@ public class ZelloChannelClient {
                 // e.g., zelloWebSocketHandler.disconnect();
                 Thread.sleep(1000); // Simulate graceful shutdown
                 connected = false;
-                System.out.println("Disconnected from Zello channel: " + channelName);
+                logger.info("Disconnected from Zello channel: {}", channelName);
                 // Notify listeners about disconnection
                 for (ZelloMessageListener listener : messageListeners) {
                     listener.onChannelStatusChanged(channelName, "disconnected");
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.err.println("Disconnection interrupted: " + e.getMessage());
+                logger.error("Disconnection interrupted: {}", e.getMessage(), e);
             } catch (Exception e) {
-                System.err.println("Error disconnecting: " + e.getMessage());
+                logger.error("Error disconnecting: {}", e.getMessage(), e);
                 for (ZelloMessageListener listener : messageListeners) {
                     listener.onError(e);
                 }
@@ -189,15 +198,15 @@ public class ZelloChannelClient {
      */
     public void startPushToTalk() {
         if (!connected) {
-            System.out.println("Cannot start PTT. Client not connected.");
+            logger.warn("Cannot start PTT. Client not connected.");
             return;
         }
         if (pttActive) {
-            System.out.println("PTT is already active.");
+            logger.warn("PTT is already active.");
             return;
         }
 
-        System.out.println("Starting Push-To-Talk on channel: " + channelName + "...");
+        logger.info("Starting Push-To-Talk on channel: {}...", channelName);
         pttActive = true;
         // Placeholder for sending start_stream command
         // e.g., zelloProtocolConverter.sendStartStream(channelName, audioFormat);
@@ -212,7 +221,7 @@ public class ZelloChannelClient {
                 //     byte[] opusData = opusCodecManager.encode(pcmData);
                 //     zelloWebSocketHandler.sendBinary(opusData);
                 // }
-                System.out.println("Audio streaming started for PTT.");
+                logger.info("Audio streaming started for PTT.");
                 for (ZelloMessageListener listener : messageListeners) {
                     listener.onAudioStreamStarted(channelName, username != null ? username : "anonymous");
                 }
@@ -222,9 +231,9 @@ public class ZelloChannelClient {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("PTT audio stream interrupted.");
+                logger.info("PTT audio stream interrupted.");
             } catch (Exception e) {
-                System.err.println("Error during PTT audio streaming: " + e.getMessage());
+                logger.error("Error during PTT audio streaming: {}", e.getMessage(), e);
                 for (ZelloMessageListener listener : messageListeners) {
                     listener.onError(e);
                 }
@@ -232,7 +241,7 @@ public class ZelloChannelClient {
                 // Ensure stop_stream is sent even on error
                 if (pttActive) { // Only if not already stopped by external call
                     // This block will execute if the loop breaks unexpectedly
-                    System.out.println("PTT audio stream ended unexpectedly. Sending stop_stream.");
+                    logger.warn("PTT audio stream ended unexpectedly. Sending stop_stream.");
                     // e.g., zelloProtocolConverter.sendStopStream(channelName);
                     pttActive = false;
                     for (ZelloMessageListener listener : messageListeners) {
@@ -249,11 +258,11 @@ public class ZelloChannelClient {
      */
     public void stopPushToTalk() {
         if (!pttActive) {
-            System.out.println("PTT is not active.");
+            logger.warn("PTT is not active.");
             return;
         }
 
-        System.out.println("Stopping Push-To-Talk on channel: " + channelName + "...");
+        logger.info("Stopping Push-To-Talk on channel: {}...", channelName);
         pttActive = false; // Signal the audio capture thread to stop
 
         if (audioCaptureTask != null) {
@@ -263,7 +272,7 @@ public class ZelloChannelClient {
 
         // Placeholder for sending stop_stream command
         // e.g., zelloProtocolConverter.sendStopStream(channelName);
-        System.out.println("Audio streaming stopped for PTT.");
+        logger.info("Audio streaming stopped for PTT.");
         for (ZelloMessageListener listener : messageListeners) {
             listener.onAudioStreamStopped(channelName, username != null ? username : "anonymous");
         }
@@ -271,13 +280,14 @@ public class ZelloChannelClient {
 
     /**
      * Internal method to start continuous audio monitoring for VOX.
-     * This runs on a separate thread and continuously checks for speech.
+     * This runs on a separate thread and continuously checks for an audio signal.
      */
     private void startVoxAudioMonitoring() {
         audioCaptureTask = audioExecutor.submit(() -> {
-            boolean speechDetected = false;
+            boolean signalDetected = false;
             long silenceStartTime = 0;
-            final long VOX_SILENCE_THRESHOLD_MS = 500; // Silence duration to stop streaming
+            // Adjustable based on voxMode, e.g., higher voxMode value = lower threshold for signal detection
+            final long SILENCE_THRESHOLD_MS = 500; // Duration of silence to stop streaming
 
             try {
                 // Placeholder for actual audio capture
@@ -287,55 +297,58 @@ public class ZelloChannelClient {
                     Thread.sleep(audioFormat.getPacketDurationMs());
                     // byte[] pcmData = audioCaptureManager.readAudioFrame();
 
-                    // Placeholder for VAD detection
-                    boolean currentSpeechDetected = Math.random() < 0.3; // Simulate random speech detection
+                    // Placeholder for simple signal detection (e.g., energy-based)
+                    // In a real implementation, you would calculate the energy of the pcmData
+                    // and compare it to a threshold derived from voxMode.
+                    // For example: boolean currentSignalDetected = calculateEnergy(pcmData) > getEnergyThreshold(voxMode);
+                    boolean currentSignalDetected = Math.random() < (0.2 + (voxMode.getValue() * 0.1)); // Simulate random detection based on mode
 
-                    if (currentSpeechDetected && !speechDetected) {
-                        // Speech detected, start streaming
-                        System.out.println("VOX: Speech detected. Starting stream.");
+                    if (currentSignalDetected && !signalDetected) {
+                        // Signal detected, start streaming
+                        logger.info("VOX: Audio signal detected. Starting stream.");
                         // e.g., zelloProtocolConverter.sendStartStream(channelName, audioFormat);
                         for (ZelloMessageListener listener : messageListeners) {
                             listener.onAudioStreamStarted(channelName, username != null ? username : "anonymous");
                         }
-                        speechDetected = true;
+                        signalDetected = true;
                         silenceStartTime = 0; // Reset silence timer
-                    } else if (!currentSpeechDetected && speechDetected) {
-                        // Silence detected after speech, start silence timer
+                    } else if (!currentSignalDetected && signalDetected) {
+                        // Silence detected after signal, start silence timer
                         if (silenceStartTime == 0) {
                             silenceStartTime = System.currentTimeMillis();
                         }
-                        if (System.currentTimeMillis() - silenceStartTime >= VOX_SILENCE_THRESHOLD_MS) {
+                        if (System.currentTimeMillis() - silenceStartTime >= SILENCE_THRESHOLD_MS) {
                             // Silence threshold reached, stop streaming
-                            System.out.println("VOX: Silence detected. Stopping stream.");
+                            logger.info("VOX: Silence detected. Stopping stream.");
                             // e.g., zelloProtocolConverter.sendStopStream(channelName);
                             for (ZelloMessageListener listener : messageListeners) {
                                 listener.onAudioStreamStopped(channelName, username != null ? username : "anonymous");
                             }
-                            speechDetected = false;
+                            signalDetected = false;
                             silenceStartTime = 0;
                         }
-                    } else if (currentSpeechDetected && speechDetected) {
-                        // Still speaking, reset silence timer
+                    } else if (currentSignalDetected && signalDetected) {
+                        // Still detecting signal, reset silence timer
                         silenceStartTime = 0;
                     }
-                    // If speech detected, continue sending audio data
-                    if (speechDetected) {
+                    // If signal detected, continue sending audio data
+                    if (signalDetected) {
                         // byte[] opusData = opusCodecManager.encode(pcmData);
                         // zelloWebSocketHandler.sendBinary(opusData);
                     }
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("VOX monitoring interrupted.");
+                logger.info("VOX monitoring interrupted.");
             } catch (Exception e) {
-                System.err.println("Error during VOX monitoring: " + e.getMessage());
+                logger.error("Error during VOX monitoring: {}", e.getMessage(), e);
                 for (ZelloMessageListener listener : messageListeners) {
                     listener.onError(e);
                 }
             } finally {
                 // Ensure stream is stopped if VOX monitoring ends
-                if (speechDetected) {
-                    System.out.println("VOX monitoring ending. Stopping stream.");
+                if (signalDetected) {
+                    logger.info("VOX monitoring ending. Stopping stream.");
                     // e.g., zelloProtocolConverter.sendStopStream(channelName);
                     for (ZelloMessageListener listener : messageListeners) {
                         listener.onAudioStreamStopped(channelName, username != null ? username : "anonymous");
@@ -374,7 +387,7 @@ public class ZelloChannelClient {
      * @param throwable The exception that occurred.
      */
     private void onWebSocketError(Throwable throwable) {
-        System.err.println("WebSocket error: " + throwable.getMessage());
+        logger.error("WebSocket error: {}", throwable.getMessage(), throwable);
         for (ZelloMessageListener listener : messageListeners) {
             listener.onError(throwable);
         }
@@ -408,4 +421,3 @@ public class ZelloChannelClient {
 
     // Add other public getters for configuration if necessary, but keep API concise.
 }
-

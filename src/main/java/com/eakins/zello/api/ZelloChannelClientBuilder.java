@@ -9,11 +9,16 @@ import com.eakins.zello.api.ptt.CustomPttHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Builder class for constructing ZelloChannelClient instances.
  * Provides a fluent API for configuring various client parameters.
  */
 public class ZelloChannelClientBuilder {
+    private static final Logger logger = LoggerFactory.getLogger(ZelloChannelClientBuilder.class);
+
     String serverUri;
     String username;
     String password;
@@ -154,7 +159,7 @@ public class ZelloChannelClientBuilder {
         if (audioFormat == null) {
             // Default audio format if not specified, matching Zello's typical Opus settings
             this.audioFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 16000, 16, 1);
-            System.out.println("Audio format not specified. Using default: PCM_SIGNED, 16kHz, 16-bit, mono.");
+            logger.info("Audio format not specified. Using default: PCM_SIGNED, 16kHz, 16-bit, mono.");
         }
         return new ZelloChannelClient(this);
     }

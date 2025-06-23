@@ -1,12 +1,19 @@
 // ZelloMessageListener.java
 package com.eakins.zello.api.event;
 
+// import com.eakins.zello.api.ZelloChannelClient; // No longer strictly needed if not directly used in default methods
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Interface for receiving various messages and status updates from the Zello channel.
  * Implement this interface to handle incoming text messages, audio streams,
  * and channel status changes.
  */
 public interface ZelloMessageListener {
+
+    Logger logger = LoggerFactory.getLogger(ZelloMessageListener.class);
 
     /**
      * Called when a text message is received on a channel.
@@ -69,9 +76,7 @@ public interface ZelloMessageListener {
      * @param error The Throwable representing the error.
      */
     default void onError(Throwable error) {
-        // Default empty implementation
-        System.err.println("ZelloClient Error: " + error.getMessage());
-        error.printStackTrace();
+        // Default implementation logs the error using SLF4J
+        logger.error("ZelloClient Error: {}", error.getMessage(), error);
     }
 }
-
