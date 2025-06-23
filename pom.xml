@@ -14,8 +14,8 @@
     <!-- <url>http://www.example.com/zello-java-api</url> -->
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -46,21 +46,11 @@
 
         <!-- JSON Processing Library (for Zello protocol messages) -->
         <!-- Option 1: Jackson (Popular and powerful) -->
-        <!--
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.17.0</version>
+            <version>2.19.1</version>
         </dependency>
-        -->
-        <!-- Option 2: Gson (Simpler, from Google) -->
-        <!--
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-        -->
 
         <!-- Opus Codec Library (JNI-based for performance) -->
         <!-- Note: opus-jni requires native libraries. See its documentation for setup. -->
