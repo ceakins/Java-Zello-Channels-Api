@@ -1,8 +1,6 @@
 // ZelloMessageListener.java
 package com.eakins.zello.api.event;
 
-import com.eakins.zello.api.ZelloChannelClient;
-
 /**
  * Interface for receiving various messages and status updates from the Zello channel.
  * Implement this interface to handle incoming text messages, audio streams,

@@ -51,11 +51,12 @@ public class ZelloChannelClient {
     private Object pttController; // Internal controller for PTT logic
 
     /**
-     * Private constructor to enforce the use of the builder pattern.
+     * Package-private constructor to enforce the use of the builder pattern.
+     * This allows ZelloChannelClientBuilder (in the same package) to create instances.
      *
      * @param builder The builder instance containing all configurations.
      */
-    private ZelloChannelClient(ZelloChannelClientBuilder builder) {
+    ZelloChannelClient(ZelloChannelClientBuilder builder) { // Changed from private to package-private
         this.serverUri = builder.serverUri;
         this.username = builder.username;
         this.password = builder.password;
@@ -68,7 +69,7 @@ public class ZelloChannelClient {
 
         // Initialize internal components (as placeholders for now)
         this.networkExecutor = Executors.newSingleThreadExecutor();
-        this.audioExecutor = Executors.newFixedThreadPool(2); // One for capture, one for playback/processing
+        this.audioExecutor = Executors.newFixedThreadPool(2); // One for capture, one for playback, one for processing
 
         // In a real app, instantiate actual WebSocket, Audio, Opus, VAD managers here.
         // For example:

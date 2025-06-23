@@ -159,4 +159,3 @@ public class ZelloChannelClientBuilder {
         return new ZelloChannelClient(this);
     }
 }
-
