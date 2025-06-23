@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.eakins.zello</groupId>
+    <artifactId>zello-java-api</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Zello Java API</name>
+    <description>A Java API for interacting with Zello Channels using a builder methodology.</description>
+    <!-- <url>http://www.example.com/zello-java-api</url> -->
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!--
+        Current API implementation uses placeholders for WebSocket, Opus, and VAD.
+        For a real-world application, you would uncomment and add the actual
+        dependencies for these functionalities. Below are common choices.
+        -->
+
+        <!-- WebSocket Client Library (Choose one) -->
+        <!-- Option 1: nv-websocket-client (Recommended for performance and async control) -->
+        <!--
+        <dependency>
+            <groupId>com.neovisionaries</groupId>
+            <artifactId>nv-websocket-client</artifactId>
+            <version>2.14</version>
+        </dependency>
+        -->
+        <!-- Option 2: Tyrus Client (JSR 356 Reference Implementation) -->
+        <!--
+        <dependency>
+            <groupId>org.glassfish.tyrus.bundles</groupId>
+            <artifactId>tyrus-standalone-client</artifactId>
+            <version>2.0</version>
+        </dependency>
+        -->
+
+        <!-- JSON Processing Library (for Zello protocol messages) -->
+        <!-- Option 1: Jackson (Popular and powerful) -->
+        <!--
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.0</version>
+        </dependency>
+        -->
+        <!-- Option 2: Gson (Simpler, from Google) -->
+        <!--
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+        -->
+
+        <!-- Opus Codec Library (JNI-based for performance) -->
+        <!-- Note: opus-jni requires native libraries. See its documentation for setup. -->
+        <!--
+        <dependency>
+            <groupId>org.concentus</groupId>
+            <artifactId>opus-jni</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        -->
+        <!-- Or if you prefer a pure Java Opus implementation (may have performance implications) -->
+        <!--
+        <dependency>
+            <groupId>org.concentus</groupId>
+            <artifactId>Concentus</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        -->
+
+        <!-- Voice Activity Detection (VAD) Library -->
+        <!-- Note: Jitsi-WebRTC-VAD-Wrapper also requires native libraries. -->
+        <!--
+        <dependency>
+            <groupId>org.jitsi</groupId>
+            <artifactId>webrtc-vad-java</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        -->
+
+        <!-- JUnit for testing (Recommended) -->
+        <!--
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <!-- You might add plugins for packaging, native library handling, etc. -->
+        </plugins>
+    </build>
+
+</project>
