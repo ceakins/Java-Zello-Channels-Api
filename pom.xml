@@ -18,6 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>2.0.13</slf4j.version>
         <logback.version>1.5.6</logback.version>
+        <testng.version>7.10.2</testng.version> <!-- Latest stable TestNG version -->
     </properties>
 
     <dependencies>
@@ -84,21 +85,13 @@
             <version>${logback.version}</version>
         </dependency>
 
-        <!-- JUnit for testing (Recommended) -->
-        <!--
+        <!-- TestNG for testing -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.0</version>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.10.0</version>
-            <scope>test</scope>
-        </dependency>
-        -->
     </dependencies>
 
     <build>
@@ -109,6 +102,18 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+            <!-- Maven Surefire Plugin to run TestNG tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version> <!-- Use a recent version of Surefire Plugin -->
+                <configuration>
+                    <suiteXmlFiles>
+                        <!-- Specify TestNG XML suite files if you use them -->
+                        <!-- <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile> -->
+                    </suiteXmlFiles>
                 </configuration>
             </plugin>
             <!-- You might add plugins for packaging, native library handling, etc. -->
