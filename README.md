@@ -42,7 +42,9 @@ This project is built with Maven. To include it in your project, add the followi
     <artifactId>zello-java-api</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
+```
 Note on Dependencies:The current API implementation uses placeholders for WebSocket, Opus codec, and Voice Activity Detection (VAD) libraries. For a functional real-world application, you will need to uncomment and include specific implementations in your pom.xml. The pom.xml already includes the Jackson dependency for JSON processing.Example placeholder dependencies in pom.xml (you'll need to uncomment and choose one for each category):WebSocket Client: nv-websocket-client or tyrus-standalone-clientOpus Codec: opus-jni (recommended for performance) or Concentus (pure Java)Voice Activity Detection (VAD): webrtc-vad-javaUsageThe API is designed with a builder pattern for easy configuration.Basic Push-To-Talk (PTT)import com.eakins.zello.api.ZelloChannelClient;
+```java
 import com.eakins.zello.api.model.AudioFormat;
 import com.eakins.zello.api.event.ZelloMessageListener;
 
@@ -177,6 +179,8 @@ public class CustomPttExample {
         }
     }
 }
+```
+```
 Project StructureThe project follows a standard Maven directory layout:zello-java-api/
 ├── pom.xml
 └── src/
@@ -205,4 +209,8 @@ Project StructureThe project follows a standard Maven directory layout:zello-jav
                     └── zello/
                         └── api/
                             └── ... (your test classes)
-ContributingContributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.LicenseThis project is licensed under the Apache License, Version 2.0. See the LICENSE file for more details.Acknowledgements & DisclaimerThis API is developed based on the publicly available documentation and observed behavior of the Zello Channels API, which is currently in beta. As such, the protocol specifications and functionalities may evolve. This project is a conceptual framework and includes
+```
+
+## Contributing
+
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.LicenseThis project is licensed under the Apache License, Version 2.0. See the LICENSE file for more details.Acknowledgements & DisclaimerThis API is developed based on the publicly available documentation and observed behavior of the Zello Channels API, which is currently in beta. As such, the protocol specifications and functionalities may evolve. This project is a conceptual framework and includes
